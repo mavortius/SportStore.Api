@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using EasyCaching.SQLite;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -29,6 +31,15 @@ namespace SportStore.Api
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 });
+
+            services.AddSQLiteCache(options => { });
+
+            services.AddSession(options =>
+            {
+                options.CookieName = "SportStore.Session";
+                options.IdleTimeout = TimeSpan.FromHours(48);
+                options.CookieHttpOnly = false;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -42,6 +53,8 @@ namespace SportStore.Api
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseSQLiteCache();
+            
             app.UseCors(builder =>
                 builder
                     .AllowAnyHeader()
