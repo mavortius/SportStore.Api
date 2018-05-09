@@ -18,7 +18,7 @@ namespace SportStore.Api.Controllers
         public ProductsController(DataContext context) => _context = context;
 
         [HttpGet]
-        public IEnumerable<Product> Get(string category, string search, bool related = false)
+        public IActionResult Get(string category, string search, bool related = false, bool metadata = false)
         {
             IQueryable<Product> query = _context.Products;
 
@@ -35,23 +35,35 @@ namespace SportStore.Api.Controllers
                     p.Name.ToLower().Contains(searchLower) || p.Description.ToLower().Contains(searchLower));
             }
 
-            if (!related) return query;
-
-            query = query.Include(p => p.Supplier).Include(p => p.Ratings);
-            var data = query.ToList();
-
-            data.ForEach(p =>
+            if (related)
             {
-                if (p.Supplier != null)
+                query = query.Include(p => p.Supplier).Include(p => p.Ratings);
+                var data = query.ToList();
+
+                data.ForEach(p =>
                 {
-                    p.Supplier.Products = null;
-                }
+                    if (p.Supplier != null)
+                    {
+                        p.Supplier.Products = null;
+                    }
 
-                p.Ratings?.ForEach(r => r.Product = null);
-            });
+                    p.Ratings?.ForEach(r => r.Product = null);
+                });
 
-            return data;
+                return metadata ? CreateMetadata(data) : Ok(data);
+            }
+
+            return metadata ? CreateMetadata(query) : Ok(query);
         }
+
+        private IActionResult CreateMetadata(IEnumerable<Product> products) => Ok(new
+        {
+            data = products,
+            categories = _context.Products
+                .Select(p => p.Category)
+                .Distinct()
+                .OrderBy(c => c)
+        });
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(long id)
