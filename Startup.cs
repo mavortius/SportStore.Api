@@ -54,6 +54,8 @@ namespace SportStore.Api
             }
 
             app.UseSQLiteCache();
+
+            app.UseSession();
             
             app.UseCors(builder =>
                 builder
