@@ -9,17 +9,25 @@ namespace SportStore.Api.Controllers
     public class SessionController : ControllerBase
     {
         [HttpGet("cart")]
-        public IActionResult GetCart()
-        {
-            return Ok(HttpContext.Session.GetString("cart"));
-        }
+        public IActionResult GetCart() => Ok(HttpContext.Session.Get<ProductSelection[]>("cart"));
 
         [HttpPost("cart")]
         public void StoreCart([FromBody] ProductSelection[] selections)
+            => HttpContext.Session.Set("cart", selections);
+    }
+
+    public static class SessionExtensions
+    {
+        public static void Set<T>(this ISession session, string key, T value)
         {
-            var jsonData = JsonConvert.SerializeObject(selections);
-            
-            HttpContext.Session.SetString("cart", jsonData);
+            session.SetString(key, JsonConvert.SerializeObject(value));
+        }
+
+        public static T Get<T>(this ISession session, string key)
+        {
+            var value = session.GetString(key);
+
+            return value == null ? default(T) : JsonConvert.DeserializeObject<T>(value);
         }
     }
 }

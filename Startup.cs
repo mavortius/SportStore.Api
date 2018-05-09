@@ -1,5 +1,4 @@
 ﻿using System;
-using EasyCaching.SQLite;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -32,13 +31,13 @@ namespace SportStore.Api
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 });
 
-            services.AddSQLiteCache(options => { });
+            services.AddDistributedMemoryCache();
 
             services.AddSession(options =>
             {
-                options.CookieName = "SportStore.Session";
+                options.Cookie.Name = "SportStore.Session";
+                options.Cookie.HttpOnly = false;
                 options.IdleTimeout = TimeSpan.FromHours(48);
-                options.CookieHttpOnly = false;
             });
         }
 
@@ -52,8 +51,6 @@ namespace SportStore.Api
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseSQLiteCache();
 
             app.UseSession();
             
