@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using SportStore.Api.Models.BindingTargets;
 namespace SportStore.Api.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(Roles = "Administrator")]
     public class ProductsController : ControllerBase
     {
         private readonly DataContext _context;
@@ -18,6 +20,7 @@ namespace SportStore.Api.Controllers
         public ProductsController(DataContext context) => _context = context;
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Get(string category, string search, bool related = false, bool metadata = false)
         {
             IQueryable<Product> query = _context.Products;
@@ -35,7 +38,7 @@ namespace SportStore.Api.Controllers
                     p.Name.ToLower().Contains(searchLower) || p.Description.ToLower().Contains(searchLower));
             }
 
-            if (related)
+            if (related && HttpContext.User.IsInRole("Administrator"))
             {
                 query = query.Include(p => p.Supplier).Include(p => p.Ratings);
                 var data = query.ToList();
@@ -66,40 +69,46 @@ namespace SportStore.Api.Controllers
         });
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(long id)
+        [AllowAnonymous]
+        public Product Get(long id)
         {
-            var product = await _context.Products
-                .Include(p => p.Supplier).ThenInclude(s => s.Products)
-                .Include(p => p.Ratings)
-                .FirstOrDefaultAsync(p => p.ProductId == id);
+            IQueryable<Product> query = _context.Products
+                .Include(p => p.Ratings);
 
-            if (product != null)
+            if (HttpContext.User.IsInRole("Administrator"))
             {
-                if (product.Supplier != null)
+                query = query
+                    .Include(p => p.Supplier)
+                    .ThenInclude(s => s.Products);
+            }
+
+            var result = query.First(p => p.ProductId == id);
+
+            if (result != null)
+            {
+                if (result.Supplier != null)
                 {
-                    product.Supplier.Products = product.Supplier.Products.Select(p =>
+                    result.Supplier.Products = result.Supplier.Products.Select(p =>
                         new Product
                         {
                             ProductId = p.ProductId,
                             Name = p.Name,
                             Category = p.Category,
                             Description = p.Description,
-                            Price = p.Price
+                            Price = p.Price,
                         });
                 }
 
-                if (product.Ratings != null)
+                if (result.Ratings != null)
                 {
-                    foreach (var rating in product.Ratings)
+                    foreach (var r in result.Ratings)
                     {
-                        rating.Product = null;
+                        r.Product = null;
                     }
                 }
-
-                return Ok(product);
             }
 
-            return NotFound();
+            return result;
         }
 
         [HttpPost]

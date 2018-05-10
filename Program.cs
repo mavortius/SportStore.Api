@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SportStore.Api.Data;
@@ -20,8 +21,12 @@ namespace SportStore.Api
                 try
                 {
                     var dbContext = services.GetRequiredService<DataContext>();
+                    var identityDbContext = services.GetRequiredService<IdentityDataContext>();
+                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+                    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
 
                     DataSeeder.Seed(dbContext);
+                    IdentityDataSeeder.Seed(identityDbContext, userManager, roleManager);
                 }
                 catch (Exception ex)
                 {

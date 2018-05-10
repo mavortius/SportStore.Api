@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,13 @@ namespace SportStore.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
+
+            services.AddDbContext<IdentityDataContext>(options =>
+                options.UseSqlite(Configuration.GetConnectionString("IdentityConnection")));
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<IdentityDataContext>();
+            
             services.AddDbContext<DataContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
@@ -47,6 +55,8 @@ namespace SportStore.Api
                     .AllowAnyMethod()
                     .AllowAnyOrigin()
                     .AllowCredentials());
+
+            app.UseAuthentication();
 
             app.UseMvc();
         }
