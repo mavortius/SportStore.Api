@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SportStore.Api.Data;
 using SportStore.Api.Models;
@@ -8,7 +7,6 @@ using SportStore.Api.Models.BindingTargets;
 namespace SportStore.Api.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Roles = "Administrator")]
     public class SuppliersController : ControllerBase
     {
         private readonly DataContext _context;

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SportStore.Api.Data;
@@ -9,7 +8,6 @@ using SportStore.Api.Models;
 namespace SportStore.Api.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Roles = "Administrator")]
     public class OrdersController : Controller
     {
         private readonly DataContext _context;
@@ -32,7 +30,6 @@ namespace SportStore.Api.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
         public IActionResult Create([FromBody] Order order)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);

@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +10,6 @@ using SportStore.Api.Models.BindingTargets;
 namespace SportStore.Api.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Roles = "Administrator")]
     public class ProductsController : ControllerBase
     {
         private readonly DataContext _context;
@@ -20,7 +17,6 @@ namespace SportStore.Api.Controllers
         public ProductsController(DataContext context) => _context = context;
 
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult Get(string category, string search, bool related = false, bool metadata = false)
         {
             IQueryable<Product> query = _context.Products;
@@ -69,7 +65,6 @@ namespace SportStore.Api.Controllers
         });
 
         [HttpGet("{id}")]
-        [AllowAnonymous]
         public Product Get(long id)
         {
             IQueryable<Product> query = _context.Products
