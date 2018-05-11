@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SportStore.Api.Models;
 
 namespace SportStore.Api.Data
 {
@@ -12,8 +13,8 @@ namespace SportStore.Api.Data
         private const string adminPassword = "MySecret123$";
         private const string adminRole = "Administrator";
 
-        public static async void Seed(IdentityDataContext context,
-            UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+        public static async void Seed(DataContext context,
+            UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             context.Database.Migrate();
 
@@ -27,14 +28,14 @@ namespace SportStore.Api.Data
 
                 if (!result.Succeeded)
                 {
-                    throw new Exception("Cannot create role: " + 
+                    throw new Exception("Cannot create role: " +
                                         result.Errors.FirstOrDefault());
                 }
             }
 
             if (user == null)
             {
-                user = new IdentityUser(adminUser);
+                user = new ApplicationUser {UserName = adminUser};
                 var result = await userManager.CreateAsync(user, adminPassword);
 
                 if (!result.Succeeded)

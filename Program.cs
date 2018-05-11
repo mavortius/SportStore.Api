@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SportStore.Api.Data;
+using SportStore.Api.Models;
 
 namespace SportStore.Api
 {
@@ -21,21 +22,20 @@ namespace SportStore.Api
                 try
                 {
                     var dbContext = services.GetRequiredService<DataContext>();
-                    var identityDbContext = services.GetRequiredService<IdentityDataContext>();
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-                    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+                    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
                     DataSeeder.Seed(dbContext);
-                    IdentityDataSeeder.Seed(identityDbContext, userManager, roleManager);
+                    IdentityDataSeeder.Seed(dbContext, userManager, roleManager);
                 }
                 catch (Exception ex)
                 {
                     var logger = services.GetRequiredService<ILogger<Program>>();
-                    
+
                     logger.LogError(ex, "An error occurred while seeding the database.");
                 }
             }
-            
+
             host.Run();
         }
 
