@@ -18,6 +18,8 @@ namespace SportStore.Api.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+            
             modelBuilder.Entity<Product>()
                 .HasMany(p => p.Ratings)
                 .WithOne(r => r.Product)
